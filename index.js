@@ -31,6 +31,9 @@ module.exports = resolvePath
  * @private
  */
 
+// 这个正则表达式是核心
+// 用于匹配上级目录，比如：../，/../
+// 不同平台的斜杠不一样
 var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/
 
 /**
@@ -47,11 +50,14 @@ function resolvePath (rootPath, relativePath) {
   var root = rootPath
 
   // root is optional, similar to root.resolve
+  // rootPath 是可选的，不传的话，会默认为进程当前的工作目录
   if (arguments.length === 1) {
     path = rootPath
+    // process.cwd() 返回 Node.js 进程当前工作的目录
     root = process.cwd()
   }
 
+  // root 和 path 都是必须参数，并且都为字符串
   if (root == null) {
     throw new TypeError('argument rootPath is required')
   }
@@ -74,6 +80,8 @@ function resolvePath (rootPath, relativePath) {
   }
 
   // path should never be absolute
+  // path 不能是绝对路径，这里使用了 path-is-absolute 模块
+  // posix() 在 POSIX 系统中，win32 在 windows 系统中
   if (pathIsAbsolute.posix(path) || pathIsAbsolute.win32(path)) {
     throw createError(400, 'Malicious Path')
   }
